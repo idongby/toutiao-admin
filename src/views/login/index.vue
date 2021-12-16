@@ -105,6 +105,8 @@ export default {
                 }
                 this.loginLoading = false
 
+                // 接口返回的数据  存到 本地
+                window.localStorage.setItem('user', JSON.stringify(res.data.data))
                 // 登录成功跳转页面
                 this.$router.push('/')
             }).catch(err => {
