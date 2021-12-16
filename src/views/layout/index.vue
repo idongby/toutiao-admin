@@ -47,6 +47,7 @@ export default {
     },
     methods: {
         loadUserProfile () {
+            // 获取用户信息
             getUserProfile().then(res => {
                 console.log(res)
                 this.user = res.data.data
