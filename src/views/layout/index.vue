@@ -1,12 +1,23 @@
 <template>
     <el-container class="layout-container">
-        <el-aside width='200px' class="aside">
-            <app-aside class="aside-menu" />
+        <el-aside width='auto' class="aside">
+            <app-aside :is-collapse="isCollapse" class="aside-menu" />
         </el-aside>
         <el-container>
             <el-header class="header">
                 <div>
-                    <i class="el-icon-s-fold"></i>
+                    <!--
+                        class 样式处理
+                        {
+                            css类名：布尔值
+                        }
+                     -->
+                    <i :class="{
+                        'el-icon-s-fold': isCollapse,
+                        'el-icon-s-unfold': !isCollapse
+                       }"
+                       @click='isCollapse = !isCollapse'
+                    ></i>
                     <span>阿栋头条内容发布管理系统</span>
                 </div>
                 <el-dropdown>
@@ -38,7 +49,8 @@ export default {
     },
     data () {
         return {
-            user: {} // 用户信息
+            user: {}, // 用户信息
+            isCollapse: false // 侧边菜单栏的展示状态
         }
     },
     created () {
