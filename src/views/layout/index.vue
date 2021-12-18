@@ -38,7 +38,7 @@
             </el-header>
             <el-main class="main">
                 <!-- 子路由出口 -->
-                <router-view></router-view>
+                <router-view />
             </el-main>
         </el-container>
     </el-container>
@@ -48,7 +48,7 @@
 import AppAside from './components/aside.vue'
 import { getUserProfile } from '@/api/user'
 export default {
-    name: 'layout',
+    name: 'LayoutIndex',
     components: {
         AppAside
     },
@@ -67,7 +67,7 @@ export default {
         loadUserProfile () {
             // 获取用户信息
             getUserProfile().then(res => {
-                console.log(res)
+                // console.log(res)
                 this.user = res.data.data
             })
         },

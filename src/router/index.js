@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
 import Login from '@/views/login/'
 import Home from '@/views/home/'
 import Layout from '@/views/layout/'
@@ -26,12 +27,17 @@ const routes = [
         // 如果 有默认子路由 ，就不要给 父路由起名字了
         // name: 'layout',
         component: Layout,
-        childer: [
+        children: [
             {
                 path: '', // path 为空，会作为默认子路由渲染
                 //   路由的名字 路由导航时候比较方便 router-link
                 name: 'home',
                 component: Home
+            },
+            {
+                path: '/article',
+                name: 'article',
+                component: () => import('@/views/article/')
             }
         ]
     }
