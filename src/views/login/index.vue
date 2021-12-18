@@ -96,7 +96,7 @@ export default {
             this.loginLoading = true
             // 验证通过，提交登录
             login(this.user).then(res => {
-                console.log(res)
+                // console.log(res)
                 if (res.data.message === 'OK') {
                     this.$message({
                         message: '登录成功',
@@ -111,7 +111,7 @@ export default {
                 // 登录成功跳转页面
                 this.$router.push('/')
             }).catch(err => {
-                console.log('登陆失败', err)
+                // console.log('登陆失败', err)
                 this.$message.error('登陆失败，手机号或验证码错误')
                 this.loginLoading = false
             })
