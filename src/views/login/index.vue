@@ -112,7 +112,7 @@ export default {
                 this.$router.push('/')
             }).catch(err => {
                 // console.log('登陆失败', err)
-                this.$message.error('登陆失败，手机号或验证码错误')
+                this.$message.error('登陆失败，手机号或验证码错误', err)
                 this.loginLoading = false
             })
         }
