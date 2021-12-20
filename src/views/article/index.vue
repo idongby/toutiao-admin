@@ -110,7 +110,7 @@
                     prop="address"
                     label="操作"
                 >
-                    <template>
+                    <template slot-scope="scope">
                         <el-button
                             size="mini"
                             circle
@@ -122,6 +122,7 @@
                             type="danger"
                             icon="el-icon-delete"
                             circle
+                            @click='onDeleteArticle(scope.row.id)'
                         ></el-button>
                     </template>
                 </el-table-column>
@@ -131,6 +132,7 @@
                 layout="prev, pager, next"
                 :total="totalCount"
                 :disabled="loading"
+                :current-page.sync="page"
                 @current-change="onCurrentChange">
             </el-pagination>
         </el-card>
@@ -138,7 +140,7 @@
 </template>
 
 <script>
-import { getArticle, getArticleChannels } from '@/api/article'
+import { getArticle, getArticleChannels, deleteArticle } from '@/api/article'
 export default {
     name: 'ArticleIndex',
     props: {
@@ -174,7 +176,8 @@ export default {
             channels: [], // 文章频道列表
             channelId: null, // 默认选择频道
             rangeDate: [], // 筛选的范围日期
-            loading: false // loading 加载中
+            loading: false, // loading 加载中
+            page: 1 // 当前页码
         }
     },
     computed: {
@@ -208,9 +211,6 @@ export default {
                 this.loading = false // 加载结束
             })
         },
-        onSubmit () {
-            console.log('submit!')
-        },
 
         // 页码改变
         onCurrentChange (page) {
@@ -221,6 +221,29 @@ export default {
         loadChannels () {
             getArticleChannels().then(res => {
                 this.channels = res.data.data.channels
+            })
+        },
+
+        // 删除文章
+        onDeleteArticle (articleId) {
+            this.$confirm('确定删除吗?', '删除提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                deleteArticle(articleId.toString()).then(res => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    })
+                })
+                // 删除成功，更新当前页
+                this.loadArticles(this.page)
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                })
             })
         }
     },
