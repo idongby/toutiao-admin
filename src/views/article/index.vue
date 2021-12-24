@@ -4,7 +4,7 @@
             <div slot="header" class="clearfix">
                 <el-breadcrumb separator-class="el-icon-arrow-right">
                     <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                    <el-breadcrumb-item>活动管理</el-breadcrumb-item>
+                    <el-breadcrumb-item>内容管理</el-breadcrumb-item>
                 </el-breadcrumb>
             </div>
             <el-form ref="form"  label-width="40px" size='small'>
@@ -116,6 +116,7 @@
                             circle
                             icon="el-icon-edit"
                             type="primary"
+                            @click="$router.push('/publish?id='+scope.row.id.toString())"
                         ></el-button>
                         <el-button
                             size="mini"
