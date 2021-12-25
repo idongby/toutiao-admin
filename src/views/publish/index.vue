@@ -12,7 +12,14 @@
                     <el-input v-model="article.title"></el-input>
                 </el-form-item>
                 <el-form-item label="内容">
-                    <el-input type="textarea" v-model="article.content"></el-input>
+                    <!-- <el-input type="textarea" v-model="article.content"></el-input> -->
+                    <el-tiptap
+                      v-model="article.content"
+                      :extensions="extensions"
+                      lang="zh"
+                      height="350"
+                      placeholder="请输入文章内容">
+                    </el-tiptap>
                 </el-form-item>
                 <el-form-item label="封面">
                     <el-radio-group v-model="article.cover.type">
@@ -42,8 +49,35 @@
 
 <script>
 import { getArticleChannels, addArticle, updateArticle, gatArticle } from '@/api/article'
+import {
+    ElementTiptap,
+    Doc,
+    Text,
+    Paragraph,
+    Heading,
+    Bold,
+    Underline,
+    Italic,
+    Strike,
+    ListItem,
+    BulletList,
+    OrderedList,
+    TodoItem,
+    TodoList,
+    HorizontalRule,
+    Fullscreen,
+    Preview,
+    CodeBlock,
+    Image,
+    TextColor
+} from 'element-tiptap'
+import 'element-tiptap/lib/index.css'
+import { uploadImage } from '@/api/image'
 export default {
     name: 'PublishIndex',
+    components: {
+        'el-tiptap': ElementTiptap
+    },
     props: {
 
     },
@@ -59,11 +93,45 @@ export default {
                 },
                 channel_id: null // 频道id
             },
-            channels: [] // 频道列表
+            channels: [], // 频道列表
+            // 编辑器的 extensions
+            // 按照生命的顺序被添加到菜单栏和气泡菜单中
+            extensions: [
+                new Doc(),
+                new Text(),
+                new Paragraph(),
+                new Heading({ level: 5 }), // 最多几级标题
+                new Bold({ bubble: true }), // 气泡菜单中渲染菜单按钮
+                new Underline({ bubble: true, menubar: false }), // 下划线
+                new Italic(), // 斜体
+                new Image({
+                    // 默认会把图片生成 base64
+                    // 字符串和内容存储在一起，如果需要自定义图片上传
+                    uploadRequest (file) {
+                        // 如果接口要求 Content-Type 是 multipart/form-data，
+                        // 则请求体必须使用 FormData
+                        const fd = new FormData()
+                        fd.append('image', file)
+                        return uploadImage(fd).then(res => {
+                            return res.data.data.url
+                        })
+                    }// 图片的上传方法，返回一个 Promise<url>
+                }), // 图片
+                new Strike(), // 删除线
+                new HorizontalRule(), // 华丽的分割线
+                new ListItem(),
+                new BulletList(), // 无序列表
+                new OrderedList(), // 有序列表
+                new TodoList(), // 复选框
+                new TodoItem(), // 复选框
+                new Fullscreen(), // 全屏
+                new Preview(), // 预览
+                new CodeBlock(), // 代码块
+                new TextColor() // 文字颜色
+            ]
         }
     },
     computed: {
-
     },
     created () {
         this.loadChannels()
@@ -117,9 +185,6 @@ export default {
                 this.article = res.data.data
             })
         }
-    },
-    components: {
-
     }
 }
 </script>
