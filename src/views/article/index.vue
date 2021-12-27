@@ -129,8 +129,8 @@
                 </el-table-column>
             </el-table>
             <el-pagination
-                background
                 class="pagination"
+                background
                 layout="prev, pager, next"
                 :total="totalCount"
                 :disabled="loading"
