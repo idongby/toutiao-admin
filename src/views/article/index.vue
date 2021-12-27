@@ -130,6 +130,7 @@
             </el-table>
             <el-pagination
                 background
+                class="pagination"
                 layout="prev, pager, next"
                 :total="totalCount"
                 :disabled="loading"
@@ -264,5 +265,9 @@ export default {
 .article-cover{
     width: 60px;
     background-size: cover;
+}
+.pagination{
+    display: flex;
+    justify-content: center;
 }
 </style>

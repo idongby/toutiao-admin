@@ -42,6 +42,7 @@
             <!-- 页码 -->
             <el-pagination
                 class="pagination"
+                background
                 @current-change="onCurrentChange"
                 :current-page.sync="page"
                 :page-size="perPage"
