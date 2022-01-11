@@ -56,18 +56,29 @@
             :visible.sync="dialogVisible"
             width="30%"
             append-to-body
+            @opened="onDialogOpened"
+            @closed="onDialogClosed"
         >
-            <img width="150" :src="previewImage" alt="">
+            <div class="preview-image-wrap">
+                <img
+                    class="preview-image"
+                    :src="previewImage"
+                    ref="preview-image"
+                >
+            </div>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+                <el-button type="primary" :loading="updatePhotoLoading" @click="onUpdatePhoto">确 定</el-button>
             </span>
         </el-dialog>
     </div>
 </template>
 
 <script>
-import { getUserProfile } from '@/api/user'
+import { getUserProfile, updateUserPhoto } from '@/api/user'
+import 'cropperjs/dist/cropper.css'
+import Cropper from 'cropperjs'
+
 export default {
     name: 'SettingsIndex',
     components: {
@@ -87,7 +98,9 @@ export default {
                 photo: ''
             }, // 用户资料
             dialogVisible: false, // 控制上传图片裁切预览的显示状态
-            previewImage: '' // 预览图片
+            previewImage: '', // 预览图片
+            cropper: null, // 裁切器实例
+            updatePhotoLoading: false // 更新用户头像的 loading 状态
         }
     },
     computed: {
@@ -114,13 +127,70 @@ export default {
             const blobData = window.URL.createObjectURL(file.files[0])
             this.previewImage = blobData
 
-            this.$refs.file.value = ''
             this.dialogVisible = true
+
+            this.$refs.file.value = ''
+        },
+
+        onDialogOpened () {
+            // 注意：img 必须是可见状态才能正常裁切
+            //  这里要在对话框里面初始化才解气
+            //  所以要在对话框完全打开的时候才能初始化
+
+            // 获取图片 DOM 节点
+            const image = this.$refs['preview-image']
+
+            // 第1次初始化好以后i，如果预览裁切的图片发生改变，
+            // 裁切器默认不会更新
+            // 如果需要预览图片发生变化，更新裁切器：
+            // 1：裁切器.replace方法
+            // 2. 销毁裁切器，重新初始化
+
+            // 初始化裁切器
+            // if (this.cropper) {
+            //     this.cropper.replace(this.previewImage)
+            //     return
+            // }
+            this.cropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'none',
+                cropBoxResizable: false
+            })
+        },
+
+        onDialogClosed () {
+            // 对话框关闭，销毁裁切器
+            this.cropper.destroy()
+        },
+
+        onUpdatePhoto () {
+            this.updatePhotoLoading = true
+            // 获取裁切的图片对象
+            this.cropper.getCroppedCanvas().toBlob(file => {
+                const fd = new FormData()
+                fd.append('photo', file)
+                updateUserPhoto(fd).then(res => {
+                    // 关闭对话框
+                    this.dialogVisible = false
+                    // 更新视图展示
+                    this.user.photo = window.URL.createObjectURL(file)
+                    // 关闭 loading
+                    this.updatePhotoLoading = false
+                })
+            })
         }
     }
 }
 </script>
 
 <style scoped lang="less">
-
+.preview-image-wrap {
+    .preview-image {
+        display: block;
+        /* This rule is very important, please don't ignore this */
+        max-width: 100%;
+        height: 200px;
+    }
+}
 </style>
