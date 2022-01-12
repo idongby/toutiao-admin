@@ -9,24 +9,28 @@
             </div>
             <el-row>
                 <el-col :span=15>
-                    <el-form ref="form" :model="user" label-width="80px">
+                    <el-form ref="userForm" :rules="rules" :model="user" label-width="80px">
                         <el-form-item label="编号">
                             {{ user.id }}
                         </el-form-item>
                         <el-form-item label="手机">
                             {{ user.mobile }}
                         </el-form-item>
-                        <el-form-item form-item label="媒体名称">
+                        <el-form-item form-item label="媒体名称" prop="name">
                             <el-input v-model="user.name"></el-input>
                         </el-form-item>
                         <el-form-item label="媒体介绍">
                             <el-input type="textarea" v-model="user.intro"></el-input>
                         </el-form-item>
-                        <el-form-item form-item label="邮箱">
+                        <el-form-item form-item label="邮箱" prop="email">
                             <el-input v-model="user.email"></el-input>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onSubmit">保存</el-button>
+                            <el-button
+                                type="primary"
+                                :loading="updateProfileLoading"
+                                @click="onUpdateUser"
+                            >保存</el-button>
                         </el-form-item>
                     </el-form>
                 </el-col>
@@ -75,9 +79,10 @@
 </template>
 
 <script>
-import { getUserProfile, updateUserPhoto } from '@/api/user'
+import { getUserProfile, updateUserPhoto, updateUserProfile } from '@/api/user'
 import 'cropperjs/dist/cropper.css'
 import Cropper from 'cropperjs'
+import globalBus from '@/utils/global-bus'
 
 export default {
     name: 'SettingsIndex',
@@ -100,7 +105,18 @@ export default {
             dialogVisible: false, // 控制上传图片裁切预览的显示状态
             previewImage: '', // 预览图片
             cropper: null, // 裁切器实例
-            updatePhotoLoading: false // 更新用户头像的 loading 状态
+            updatePhotoLoading: false, // 更新用户头像的 loading 状态
+            updateProfileLoading: false, // 更新用户信息的 loading 状态
+            rules: {
+                name: [
+                    { required: true, message: '请输入名字', trigger: 'blur' },
+                    { min: 1, max: 7, message: '请输入1-7位数名字', trigger: 'blur' }
+                ],
+                email: [
+                    { required: true, message: '请输入邮箱', trigger: 'blur' },
+                    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+                ]
+            }
         }
     },
     computed: {
@@ -116,6 +132,28 @@ export default {
 
     },
     methods: {
+        onUpdateUser () {
+            // 表单验证
+            this.$refs.userForm.validate((valid) => {
+                if (!valid) {
+                    return false
+                }
+
+                this.updateProfileLoading = true
+                updateUserProfile(this.user).then(res => {
+                    if (res.data.message === 'OK') {
+                        this.updateProfileLoading = false
+
+                        this.$message({
+                            message: '修改成功',
+                            type: 'success'
+                        })
+
+                        globalBus.$emit('update-user', this.user)
+                    }
+                })
+            })
+        },
         loadUser () {
             getUserProfile().then(res => {
                 this.user = res.data.data
@@ -171,12 +209,18 @@ export default {
                 const fd = new FormData()
                 fd.append('photo', file)
                 updateUserPhoto(fd).then(res => {
+                    this.$message({
+                        message: '修改成功',
+                        type: 'success'
+                    })
                     // 关闭对话框
                     this.dialogVisible = false
                     // 更新视图展示
                     this.user.photo = window.URL.createObjectURL(file)
                     // 关闭 loading
                     this.updatePhotoLoading = false
+
+                    globalBus.$emit('update-user', this.user)
                 })
             })
         }

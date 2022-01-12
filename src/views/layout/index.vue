@@ -47,6 +47,8 @@
 <script>
 import AppAside from './components/aside.vue'
 import { getUserProfile } from '@/api/user'
+import globalBus from '@/utils/global-bus'
+
 export default {
     name: 'LayoutIndex',
     components: {
@@ -61,6 +63,12 @@ export default {
     created () {
         // 组件初始化好，请求获取用户资料
         this.loadUserProfile()
+
+        // 注册自定义事件
+        globalBus.$on('update-user', (data) => {
+            this.user.name = data.name
+            this.user.photo = data.photo
+        })
     },
     methods: {
         // 获取用户信息
