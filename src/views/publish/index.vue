@@ -28,14 +28,40 @@
                         <el-radio :label="0">无图</el-radio>
                         <el-radio :label="-1">自助</el-radio>
                     </el-radio-group>
+                    <!--
+                        $event 代表的事件本身的参数，子组件穿进来的参数
+
+                        给子组件提供的数据 还要修改的时候，可以使用 v-model 数据绑定
+                        v-model="article.cover.images[index]"
+                            给子组件传递了一个名字叫 value 的数据
+                            :value="article.cover.images[index]"
+                            默认监听 input 事件，
+                            当事件发生，它会让绑定数据 = 事件参数
+                            @imput="article.cover.images[index] = 事件参数"
+                    -->
+                    <template v-if="article.cover.type > 0">
+                        <upload-cover
+                            v-for="(cover, index) in article.cover.type"
+                            :key="index"
+                            v-model="article.cover.images[index]"
+                        />
+                        <!-- <upload-cover
+                            v-for="(cover, index) in article.cover.type"
+                            :key="index"
+                            :cover-image="article.cover.images[index]"
+                            @update-cover="onUpdateCover(index, $event)"
+                        /> -->
+                    </template>
                 </el-form-item>
                 <el-form-item label="频道" prop="channel_id">
                     <el-select v-model="article.channel_id" placeholder="请选择频道">
                     <el-option
-                      v-for="(channel, index) in channels"
-                      :key="index"
-                      :label="channel.name"
-                      :value="channel.id"></el-option>
+                        v-for="(channel, index) in channels"
+                        :key="index"
+                        :label="channel.name"
+                        :value="channel.id"
+                    >
+                    </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -48,6 +74,7 @@
 </template>
 
 <script>
+import UploadCover from './components/upload-cover'
 import { getArticleChannels, addArticle, updateArticle, gatArticle } from '@/api/article'
 import {
     ElementTiptap,
@@ -76,7 +103,8 @@ import { uploadImage } from '@/api/image'
 export default {
     name: 'PublishIndex',
     components: {
-        'el-tiptap': ElementTiptap
+        'el-tiptap': ElementTiptap,
+        'upload-cover': UploadCover
     },
     props: {
 
@@ -214,6 +242,11 @@ export default {
                 console.log(res)
                 this.article = res.data.data
             })
+        },
+        onUpdateCover (index, url) {
+            console.log('onUpdateCover', url)
+            // 用 set 来解决DOM不更新问题
+            this.$set(this.article.cover.images, index, url)
         }
     }
 }
